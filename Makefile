@@ -1,31 +1,45 @@
 CC = gcc
 
-CFLAGS = -Wall -Wextra -Werror -g
+CFLAGS = -O3 -Ipthreads -Wall -Wextra -Werror
 
-LIBS = -lmlx -lXext -lX11 -L minilibx-linux -lm libft/libft.a
+LIBS =  -framework OpenGL minilibx/libmlx.a libft/libft.a -framework AppKit
 
-SRCS = events.c fractals.c fractol.c utils.c window.c
+SRCS = events.c fractals.c fractol.c utils.c window.c calc.c
 
 HEADERS = fractol.h
 
 OBJS = $(SRCS:.c=.o)
 
 TARGET = fractol
+ 
+SUBDIRS = libft minilibx
 
-$(TARGET): $(OBJS)
+$(TARGET): build_subdirs $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) $(LIBS)
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-clean:
+clean: clean_subdirs
 	rm -f $(OBJS)
 
-fclean: clean
+fclean: fclean_subdirs clean
 	rm -f $(TARGET)
+
+build_subdirs:
+		@for dir in $(SUBDIRS); do \
+			$(MAKE) -C $$dir; \
+		done
+
+clean_subdirs:
+			$(MAKE) -C libft clean;
+
+fclean_subdirs:
+			$(MAKE) -C libft fclean; \
+			$(MAKE) -C minilibx clean;
 
 re: fclean all
 
-.PHONY: all clean fclean re
-
 all: $(TARGET)
+
+.PHONY: all clean fclean re build_subdirs clean_subdirs fclean_subdirs
